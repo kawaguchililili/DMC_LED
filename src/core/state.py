@@ -1,7 +1,7 @@
 import asyncio
-from led_controller import LEDController
-from osc_server import OSCServer
-from bpm_client import BPMClient
+from src.devices.led_controller import LEDController
+from src.net.osc_server import OSCServer
+from src.net.bpm_client import BPMClient
 
 class AppState:
     def __init__(self):

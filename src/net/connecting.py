@@ -2,7 +2,7 @@ import asyncio
 from matplotlib.colors import to_rgb
 from bleak import BleakScanner, BleakClient
 from bleak.exc import BleakDBusError
-from .device import BleLedDevice
+from src.devices.device import BleLedDevice
 
 async def connect_device(prefix="ELK-BLEDOM", max_attempts=5):
     attempt = 0

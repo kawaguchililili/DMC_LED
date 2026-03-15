@@ -1,7 +1,7 @@
-from state import state
-from src.device import Effects
+from .state import state
+from src.devices.device import Effects
 import asyncio
-import midi
+from src.devices import midi
 
 #------------データ送信-----------------------
 async def send_data(data_type, data1, data2):
@@ -104,7 +104,6 @@ async def BPM_Change(value):
 async def BRIGHTNESS_CHANGE(value):
     brightness = int(value / 1.27)
     state.last_led_state["brightness"] = brightness
-    print("brightness change")
     await state.led.brightnessChange(brightness)
     await send_data(1, 1, brightness)
 
