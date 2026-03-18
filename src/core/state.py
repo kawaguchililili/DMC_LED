@@ -5,7 +5,7 @@ from src.net.bpm_client import BPMClient
 
 class AppState:
     def __init__(self):
-        self.MasterBpm = 150
+        self.MasterBpm = 138
         self.last_led_state = {
             "multiplier": 1,
             "white_multiplier": 1,

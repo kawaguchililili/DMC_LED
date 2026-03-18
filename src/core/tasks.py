@@ -1,4 +1,5 @@
 from .state import state
+import time
 from src.devices.device import Effects
 import asyncio
 from src.devices import midi
@@ -82,9 +83,9 @@ async def BPM_Change_white(value):
 async def BPM_Change(value):
     BPM_MULTIPLIER_LIST = [
         (20, 1/ 4),
-        (40, 1 / 2),
-        (80, 1),
-        (102, 2),
+        (49, 1 / 2),
+        (78, 1),
+        (107, 2),
         (127, 4)
     ]
 
@@ -124,6 +125,8 @@ async def SPEED_Change_7color_blink(value):
 
 
 #----------モニタータスク----------
+
+
 async def midi_listner():
 
     BPM = 40
@@ -142,24 +145,43 @@ async def midi_listner():
         SPEED_FOR_7COLOR_BLINK:SPEED_Change_7color_blink
     }
 
+    # デバウンス用の辞書
+    debounce_tasks = {}
+    DEBOUNCE_DELAY = 0.01 # 50ms。ノブを回し終えてからこの時間だけ待って実行する
+
+    async def debounce_runner(handler, value):
+        """指定時間待ってから関数を実行するコルーチン"""
+        try:
+            await asyncio.sleep(DEBOUNCE_DELAY)
+            await handler(value)
+        except asyncio.CancelledError:
+            # キャンセルされたら何もしない
+            pass
+
     while True:
         mididata = midiSignal.get_midi()
         if mididata is not None:
             status = mididata[0][0][0]
             control_number = mididata[0][0][1]
             command = status & 0xF0
-                
+            # PADからのの入力
             if command in (0x90,):
                 value = mididata[0][0][1]
                 if 36 <= value <= 43:
                     await PAD(value)
-
-            elif command in (0xB0,):         
+            # ノブからの入力
+            elif command in (0xB0,):
                 if control_number in control_map:
                     value = mididata[0][0][2]
+                    # 既存のデバウンスタスクがあればキャンセル
+                    if control_number in debounce_tasks and not debounce_tasks[control_number].done():
+                        debounce_tasks[control_number].cancel()
+                    # 新しいデバウンスタスクを作成して実行
                     handler_function = control_map.get(control_number)
-                    await handler_function(value)        
-        await asyncio.sleep(0.01)  
+                    debounce_tasks[control_number] = asyncio.create_task(
+                        debounce_runner(handler_function, value)
+                    )
+        await asyncio.sleep(0.005) # MIDI入力のポーリング間隔  
 
 async def bpm_monitor_task():
     last_processed_bpm = -1

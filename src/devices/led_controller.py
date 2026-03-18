@@ -73,6 +73,7 @@ class LEDController:
             # 前回送信から10ms未満なら待つ
             if elapsed < MIN_INTERVAL:
                 await asyncio.sleep(MIN_INTERVAL - elapsed)
+                
 
             try:
                 await self.device.set_brightness(self._brightness)
