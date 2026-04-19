@@ -1,7 +1,7 @@
 from quart import Quart, Response,  render_template, url_for, request, jsonify, websocket
 from quart_events import EventBroker
-from state import state
-import tasks
+from src.core import state
+from src.core import tasks
 import json
 import asyncio
 BEAT_END = 16
@@ -139,4 +139,4 @@ async def sse():
 
 
 if __name__ == "__main__":
-    app.run(debug=True, use_reloader=False)
+    app.run(debug=False, use_reloader=False)

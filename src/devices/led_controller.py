@@ -1,7 +1,7 @@
 import os
 import asyncio
 import time
-from src import connect_device
+from src.net.connecting import connect_device
 
 
 def run_async_coroutine(coro):
@@ -44,6 +44,13 @@ class LEDController:
             )
             await self.sequencer.start()
 
+    async def set_effect(self, effect):
+        if self.sequencer:
+            await self.sequencer.stop()
+        await self.device.set_effect(effect)
+        
+    async def set_effect_speed(self, speed):
+        await self.device.set_effect_speed(speed)
 
     async def stop_color(self):
         if self.sequencer:
@@ -51,22 +58,22 @@ class LEDController:
             await self.sequencer.stop() 
 
     async def brightnessChange(self, brightness):
-        print(f"change brightness to {brightness}")
         self._brightness = int(brightness)
         self._brightness_event.set()
-
+    
     async def _brightness_task(self):
         """明るさをリアルタイム反映 + 送信レート制御"""
-        MIN_INTERVAL = 0.020  # 20ms
+        MIN_INTERVAL = 0.010  # 10ms
         while True:
             await self._brightness_event.wait()
             self._brightness_event.clear()
             now = asyncio.get_event_loop().time()
             elapsed = now - self._last_brightness_send
 
-            # 前回送信から20ms未満なら待つ
+            # 前回送信から10ms未満なら待つ
             if elapsed < MIN_INTERVAL:
                 await asyncio.sleep(MIN_INTERVAL - elapsed)
+                
 
             try:
                 await self.device.set_brightness(self._brightness)
@@ -108,7 +115,6 @@ class ColorSequencer:
 
             
     def change_bpm(self, BPM):
-        print(f"change bpm, to {BPM}")
         self.BPM = BPM
 
     async def run_sequence(self):
