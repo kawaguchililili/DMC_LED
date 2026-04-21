@@ -1,5 +1,4 @@
 import asyncio
-from matplotlib.colors import to_rgb
 from bleak import BleakScanner, BleakClient
 from bleak.exc import BleakDBusError
 from src.devices.device import BleLedDevice
