@@ -145,7 +145,6 @@ pip install -r requirements.txt
 下記コマンドを実行して起動してください。
 
 ~~~bash
-cd DMC_LED
 python main.py
 ~~~
 
